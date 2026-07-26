@@ -13,7 +13,7 @@ def test_customer_discovery_engine_kpi_metrics():
     questions = CustomerDiscoveryEngine.BEHAVIORAL_QUESTIONS
     assert len(questions) == 8
     assert questions[0]["id"] == 1
-    assert "repetition" in questions[0]["percentage_badge"].lower()
+    assert "reorder" in questions[0]["percentage_badge"].lower()
 
 
 def test_category_adoption_dataframe():

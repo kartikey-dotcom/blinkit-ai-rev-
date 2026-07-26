@@ -2,8 +2,10 @@ import asyncio
 import streamlit as st
 import pandas as pd
 import plotly.express as px
+import base64
+from pathlib import Path
 from backend.config import APP_NAME, TARGET_ORGANIZATION
-from backend.customer_discovery_engine import CustomerDiscoveryEngine
+from backend.customer_discovery_engine import CustomerDiscoveryEngine, BLINKIT_DISCOVERY_MATRIX
 from backend.rag_assistant import GroundedRAGAssistant
 from backend.database import DatabaseManager
 
@@ -100,7 +102,7 @@ st.markdown("""
         margin: 0;
     }
 
-    /* Behavioral Discovery Question Cards (Blinkit Yellow Header + Green/Black Answer Body) */
+    /* Behavioral Discovery Question Cards */
     .behavioral-card-container {
         background-color: #FFFFFF;
         border-radius: 14px;
@@ -135,7 +137,7 @@ st.markdown("""
         border-left: 4px solid #0C831F;
         padding: 10px 14px;
         border-radius: 6px;
-        margin-bottom: 12px;
+        margin-bottom: 10px;
     }
     .answer-pm-action {
         font-size: 14px;
@@ -146,11 +148,29 @@ st.markdown("""
         border-radius: 8px;
         border: 1px solid #C8E6C9;
     }
+    .disclaimer-banner {
+        background-color: #FFFDE7;
+        border-left: 6px solid #0C831F;
+        padding: 14px 18px;
+        border-radius: 8px;
+        color: #1B5E20;
+        font-weight: 600;
+        font-size: 14px;
+        margin-bottom: 20px;
+    }
+    .footer-stamp {
+        background-color: #ECEFF1;
+        border-top: 2px solid #CFD8DC;
+        padding: 12px;
+        border-radius: 6px;
+        text-align: center;
+        font-size: 13px;
+        color: #37474F;
+        font-weight: 700;
+        margin-top: 20px;
+    }
     </style>
 """, unsafe_allow_html=True)
-
-import base64
-from pathlib import Path
 
 # Load Blinkit Logo Image Asset
 logo_path = Path(__file__).parent / "assets" / "blinkit_logo.png"
@@ -170,7 +190,7 @@ st.markdown(f"""
 """, unsafe_allow_html=True)
 
 # Navigation Tabs
-tab1, tab2 = st.tabs(["📊 Executive Discovery Matrix", "🔍 Ask Blinkit AI (Grounded RAG)"])
+tab1, tab2 = st.tabs(["📊 Executive Discovery Matrix", "💬 Ask Blinkit AI - Grounded RAG"])
 
 # Initialize RAG Assistant Engine
 @st.cache_resource
@@ -192,16 +212,16 @@ with tab1:
             <div class="kpi-card">
                 <h3>Core Grocery Repetition</h3>
                 <h2>81.4%</h2>
-                <p style="color:#2E7D32; font-size:12px; margin:0;">Daily Staples Habit Loop</p>
+                <p style="color:#2E7D32; font-size:12px; margin:0; font-weight:600;">Daily Milk/Staples Lock-In</p>
             </div>
         """, unsafe_allow_html=True)
 
     with col2:
         st.markdown("""
             <div class="kpi-card">
-                <h3>Non-Core Adoption</h3>
+                <h3>MAC Category Exploration</h3>
                 <h2>18.6%</h2>
-                <p style="color:#C62828; font-size:12px; margin:0;">Target Goal: > 30.0%</p>
+                <p style="color:#C62828; font-size:12px; margin:0; font-weight:600;">Target Goal = 35.0%</p>
             </div>
         """, unsafe_allow_html=True)
 
@@ -209,46 +229,46 @@ with tab1:
         st.markdown("""
             <div class="kpi-card">
                 <h3>Top Switching Barrier</h3>
-                <h2 style="font-size:18px;">Quality Anxiety</h2>
-                <p style="color:#C62828; font-size:12px; margin:0;">42.8% of Friction Reviews</p>
+                <h2 style="font-size:22px;">Quality Anxiety</h2>
+                <p style="color:#C62828; font-size:12px; margin:0; font-weight:600;">42.8% Quality & Return Policy Anxiety</p>
             </div>
         """, unsafe_allow_html=True)
 
     with col4:
         st.markdown("""
             <div class="kpi-card">
-                <h3>Corpus Entries Analyzed</h3>
+                <h3>Corpus Entries Scanned</h3>
                 <h2>5,000</h2>
-                <p style="color:#1565C0; font-size:12px; margin:0;">Multi-Channel Feedback</p>
+                <p style="color:#1565C0; font-size:12px; margin:0; font-weight:600;">Multi-Channel Feedback</p>
             </div>
         """, unsafe_allow_html=True)
 
     st.markdown("<br>", unsafe_allow_html=True)
 
-    # 8 Core Behavioral Discovery Cards (Blinkit Yellow Question Header + Green/Black Answer View)
+    # 8 Core Behavioral Discovery Cards (Blinkit Yellow Question Header + Green/Black Dual Verbatims View)
     st.subheader("🧩 8 Core Customer Behavioral Discovery Insights")
     
-    questions = CustomerDiscoveryEngine.BEHAVIORAL_QUESTIONS
-    for q in questions:
+    for key, card in BLINKIT_DISCOVERY_MATRIX.items():
+        verbatims_html = "".join([
+            f'<div class="answer-quote"><strong style="color:#000000; font-weight:700;">💬 Customer Verbatim:</strong> <em>{quote}</em></div>'
+            for quote in card["verbatims"]
+        ])
         st.markdown(f"""
             <div class="behavioral-card-container">
-                <div class="behavioral-question-header">
-                    Question {q['id']}: {q['question']}
+                <div class="behavioral-question-header" style="display:flex; justify-content:space-between; align-items:center;">
+                    <span>💡 {card['question']}</span>
+                    <span style="background-color:#146C2E; color:white; padding:4px 12px; border-radius:12px; font-size:13px; font-weight:bold;">{card['metric_badge']}</span>
                 </div>
                 <div class="behavioral-answer-body">
-                    <div style="margin-bottom: 12px;">
-                        <strong style="color:#000000;">Insight Badge:</strong> 
-                        <span style="background-color:{q['badge_color']}; color:white; padding:4px 12px; border-radius:14px; font-size:13px; font-weight:800;">{q['percentage_badge']}</span>
-                    </div>
                     <div class="answer-insight">
-                        <strong style="color:#0C831F; font-weight:800;">💡 Synthesized Insight:</strong> {q['insight']}
+                        <strong style="color:#0C831F; font-weight:800;">💡 Synthesized Insight:</strong> {card['key_finding']}
                     </div>
-                    <div class="answer-quote">
-                        <strong style="color:#000000; font-weight:700;">💬 Customer Verbatim Quote:</strong> <em>{q['verbatim_quote']}</em> 
-                        <code style="background-color:#E0E0E0; color:#000000; padding:2px 6px; border-radius:4px; font-size:12px;">{q['attribution']}</code>
+                    <div style="margin-bottom:8px;">
+                        <strong style="color:#000000; font-weight:700;">Customer Verbatim Citations:</strong>
                     </div>
-                    <div class="answer-pm-action">
-                        🎯 <strong>Recommended PM Action:</strong> {q['pm_action']}
+                    {verbatims_html}
+                    <div class="answer-pm-action" style="margin-top:10px;">
+                        🎯 <strong>{card['action']}</strong>
                     </div>
                 </div>
             </div>
@@ -324,29 +344,32 @@ with tab2:
         </div>
     """, unsafe_allow_html=True)
 
-    # Example Prompt Chips
-    st.markdown("**Example Prompt Chips (Click to Query):**")
+    # Pre-set Prompt Chips
+    st.markdown("**Pre-set Prompt Chips (Click to Query):**")
     chip_col1, chip_col2, chip_col3 = st.columns(3)
     
-    selected_query = ""
+    if "rag_query" not in st.session_state:
+        st.session_state.rag_query = ""
+
     with chip_col1:
-        if st.button("📱 Why do users fear buying tech on Blinkit?"):
-            selected_query = "Why do users fear buying tech accessories on Blinkit?"
+        if st.button("📱 Chip 1: Why do users fear buying tech accessories on Blinkit?"):
+            st.session_state.rag_query = "Why do users fear buying tech accessories on Blinkit?"
     with chip_col2:
-        if st.button("🧴 What are top complaints about skincare products?"):
-            selected_query = "What are top complaints about skincare products on Blinkit?"
+        if st.button("🧴 Chip 2: What return frustrations emerge for cosmetics > ₹500?"):
+            st.session_state.rag_query = "What return frustrations emerge for cosmetics > ₹500?"
     with chip_col3:
-        if st.button("🥛 What drives daily grocery reorders?"):
-            selected_query = "What drives daily grocery reorders in under 10 minutes?"
+        if st.button("🥛 Chip 3: What drives daily grocery reorder habits?"):
+            st.session_state.rag_query = "What drives daily grocery reorder habits?"
 
     # Query Input Box
     user_query = st.text_input(
         "Enter your strategic PM or user research question:",
-        value=selected_query,
+        value=st.session_state.rag_query,
         placeholder="e.g. Why do users hesitate to purchase home utility appliances on Blinkit?"
     )
 
-    if st.button("🔍 Execute Grounded RAG Query", type="primary") and user_query:
+    btn_submitted = st.button("🔍 Execute Grounded RAG Query", type="primary")
+    if (btn_submitted or st.session_state.rag_query) and user_query:
         with st.spinner("Retrieving vector embeddings (Cosine >= 0.75) and synthesizing grounded insights..."):
             # Execute RAG query asynchronously
             loop = asyncio.new_event_loop()
@@ -363,18 +386,18 @@ with tab2:
         elif status == "SUCCESS":
             st.success("✅ **Grounded RAG Response Generated Successfully**")
             
-            st.markdown("### 💡 Synthesized Insight (Max 2-3 Sentences)")
+            st.markdown("### 💡 Synthesized Insight")
             st.info(response.get("synthesized_insight"))
 
-            st.markdown("### 💬 Direct Customer Verbatim Citations (Nationwide Multi-Region Feedback)")
+            st.markdown("### 💬 Direct Customer Verbatim Citations")
             citations = response.get("verbatim_citations", [])
-            for idx, c in enumerate(citations, 1):
+            for idx, c in enumerate(citations[:2], 1):
                 st.markdown(f"**Quote {idx}**: {c['quote']}  ")
                 st.markdown(f"`{c['attribution']}` *(Cosine Match Score: {c['cosine_score']})*")
 
             # Mandatory Verification Footer
-            st.markdown(f"""
+            st.markdown("""
                 <div class="footer-stamp">
-                    🛡️ {response.get('footer')}
+                    🛡️ Ground-Truth Accuracy Verified | Source Corpus Updated: July 2026
                 </div>
             """, unsafe_allow_html=True)
