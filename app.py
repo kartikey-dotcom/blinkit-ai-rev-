@@ -332,7 +332,7 @@ with tab2:
     if "rag_query" not in st.session_state or not st.session_state.rag_query:
         st.session_state.rag_query = "Why do users fear buying tech accessories on Blinkit?"
 
-    # 8 Interactive Prompt Chips (2 Columns x 4 Rows Grid)
+    # 7 Interactive Prompt Chips
     st.markdown("**Interactive Question Suggestions (Click to Query):**")
     chip_col1, chip_col2 = st.columns(2)
 
@@ -343,17 +343,15 @@ with tab2:
             st.session_state.rag_query = "What return frustrations emerge for cosmetics > ₹500?"
         if st.button("🥛 3. What drives daily grocery reorder habits?"):
             st.session_state.rag_query = "What drives daily grocery reorder habits?"
-        if st.button("🔌 4. How does non-returnable policy impact electronics purchases?"):
-            st.session_state.rag_query = "How does non-returnable policy impact electronics purchases?"
+        if st.button("🍳 4. Why do users hesitate to buy home utility appliances?"):
+            st.session_state.rag_query = "Why do users hesitate to buy home utility appliances?"
 
     with chip_col2:
-        if st.button("🍳 5. Why do users hesitate to buy home utility appliances?"):
-            st.session_state.rag_query = "Why do users hesitate to buy home utility appliances?"
-        if st.button("⚡ 6. How do peak-hour surge fees & handling fees impact cart building?"):
+        if st.button("⚡ 5. How do peak-hour surge fees & handling fees impact cart building?"):
             st.session_state.rag_query = "How do peak-hour surge fees & handling fees impact cart building?"
-        if st.button("📦 7. What triggers initial trial in Blinkit Bistro & Gourmet?"):
+        if st.button("📦 6. What triggers initial trial in Blinkit Bistro & Gourmet?"):
             st.session_state.rag_query = "What triggers initial trial in Blinkit Bistro & Gourmet?"
-        if st.button("👑 8. What differentiates Category Experimenters from Grocery Loyalists?"):
+        if st.button("👑 7. What differentiates Category Experimenters from Grocery Loyalists?"):
             st.session_state.rag_query = "What differentiates Category Experimenters from Grocery Loyalists?"
 
     st.markdown("<br>", unsafe_allow_html=True)
