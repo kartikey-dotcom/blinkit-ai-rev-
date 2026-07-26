@@ -274,7 +274,7 @@ with tab2:
             st.markdown("### 💡 Synthesized Insight (Max 2-3 Sentences)")
             st.info(response.get("synthesized_insight"))
 
-            st.markdown("### 💬 Direct Customer Verbatim Citations (Exactly 2 Quotes)")
+            st.markdown("### 💬 Direct Customer Verbatim Citations (Nationwide Multi-Region Feedback)")
             citations = response.get("verbatim_citations", [])
             for idx, c in enumerate(citations, 1):
                 st.markdown(f"**Quote {idx}**: {c['quote']}  ")

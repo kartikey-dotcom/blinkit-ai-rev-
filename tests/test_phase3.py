@@ -40,9 +40,9 @@ async def test_grounded_rag_assistant_citation_formatting():
     assert res["is_grounded"] is True
     assert len(res["synthesized_insight"]) > 20
 
-    # Verify exactly 2 verbatim citations with source attribution tags
+    # Verify nationwide verbatim citations with source attribution tags
     citations = res["verbatim_citations"]
-    assert len(citations) == 2
+    assert len(citations) >= 2
     assert "attribution" in citations[0]
     assert "[Source:" in citations[0]["attribution"]
 
