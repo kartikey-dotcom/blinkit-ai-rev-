@@ -31,5 +31,5 @@ async def test_continuous_scheduler_cycle():
 
     assert summary["status"] == "SUCCESS"
     assert "timestamp" in summary
-    assert summary["phase1_summary"].get("valid_sanitized", summary["phase1_summary"].get("valid_reviews", 0)) > 0
+    assert summary["phase1_summary"].get("total_sanitized_valid", 0) > 0
     assert summary["phase2_summary"]["total_chunks_embedded"] > 0
