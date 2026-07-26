@@ -131,6 +131,9 @@ class VectorStoreManager:
         Executes Cosine Similarity search over indexed vector chunks.
         Enforces min similarity threshold (default Cosine Score >= 0.75).
         """
+        if not self._vector_cache and self.db_path.exists():
+            self.load_index_into_memory()
+
         min_score = threshold if threshold is not None else self.min_similarity_threshold
         matched_results: List[VectorSearchResult] = []
 
