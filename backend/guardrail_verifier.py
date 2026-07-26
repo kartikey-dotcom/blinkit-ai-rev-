@@ -5,8 +5,8 @@ from typing import Tuple, Optional
 class GuardrailVerifier:
     """
     Refusal & Guardrail Verifier for Blinkit RAG Discovery Engine.
-    Intercepts non-factual, speculative, stock/financial, or personal PII queries 
-    prior to vector retrieval and provides polite navigational guidance.
+    Intercepts non-factual, speculative, stock/financial, trivia, general knowledge, 
+    or personal PII queries prior to vector retrieval and provides polite navigational guidance.
     """
 
     # Keyword patterns for out-of-scope query detection
@@ -20,6 +20,14 @@ class GuardrailVerifier:
     )
     PII_EXTRACTION_PATTERNS = re.compile(
         r'\b(?:phone numbers?|email address(?:es)?|order ids?|home address(?:es)?|personal details|reviewer names?|user phone|contact info(?:rmation)?)\b',
+        re.IGNORECASE
+    )
+    GENERAL_KNOWLEDGE_PATTERNS = re.compile(
+        r'\b(?:president|prime minister|governor|capital|who is|who was|who won|world cup|olympics|movie|actor|actress|politics|election|narendra modi|droupadi murmu|bjp|congress|recipe|cook|math|joke|riddle|song|lyrics|weather|temperature|history|geography|science|planet|sun|moon|star)\b',
+        re.IGNORECASE
+    )
+    DOMAIN_KEYWORDS_PATTERN = re.compile(
+        r'\b(?:blinkit|grofers|zomato|grocery|groceries|order|orders|delivery|deliver|return|returns|refund|exchange|item|items|product|products|category|categories|tech|charger|earbud|cosmetic|skincare|app|support|chat|surge|price|fee|checkout|cart|store|dark store|review|reviews|customer|customers|user|users|feedback|quality|delay|speed|habit|buy|purchase|explore|resistance|friction)\b',
         re.IGNORECASE
     )
 
@@ -49,6 +57,16 @@ class GuardrailVerifier:
 
         # 3. Check PII Extraction Requests
         if cls.PII_EXTRACTION_PATTERNS.search(text):
+            return False, cls.STANDARD_REFUSAL_MESSAGE
+
+        # 4. Check General Knowledge / Trivia / Politics / Irrelevant Queries
+        if cls.GENERAL_KNOWLEDGE_PATTERNS.search(text):
+            if not cls.DOMAIN_KEYWORDS_PATTERN.search(text):
+                return False, cls.STANDARD_REFUSAL_MESSAGE
+
+        # 5. Domain Relevance Safety Net: If query has >= 3 words and zero domain keywords
+        words = text.split()
+        if len(words) >= 3 and not cls.DOMAIN_KEYWORDS_PATTERN.search(text):
             return False, cls.STANDARD_REFUSAL_MESSAGE
 
         return True, None

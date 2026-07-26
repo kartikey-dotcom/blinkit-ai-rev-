@@ -14,6 +14,7 @@ import base64
 from backend.config import APP_NAME, TARGET_ORGANIZATION
 from backend.customer_discovery_engine import CustomerDiscoveryEngine, BLINKIT_DISCOVERY_MATRIX
 from backend.rag_assistant import GroundedRAGAssistant
+from backend.guardrail_verifier import GuardrailVerifier
 from backend.database import DatabaseManager
 
 # Page Configuration
@@ -354,13 +355,12 @@ with tab2:
 
     btn_submitted = st.button("🔍 Execute Grounded RAG Query", type="primary")
 
-    # Dynamic RAG Engine Execution
+    # Dynamic RAG Engine Execution with Guardrail Verification
     if user_query:
-        query_lower = user_query.lower()
-        out_of_scope_keywords = ["stock price", "automobile", "car", "phone number", "address", "delivery boy contact"]
+        is_valid, refusal_msg = GuardrailVerifier.validate_query(user_query)
 
-        if any(kw in query_lower for kw in out_of_scope_keywords):
-            st.warning("⚠️ This query falls outside the indexed customer feedback corpus. Please ask questions related to product friction, returns, category exploration, or user sentiment.")
+        if not is_valid:
+            st.error(f"⛔ **Query Refused**: {refusal_msg}")
         else:
             with st.spinner("Retrieving vector embeddings (Cosine >= 0.75) and synthesizing grounded insights..."):
                 loop = asyncio.new_event_loop()
@@ -370,7 +370,7 @@ with tab2:
             status = response.get("status")
 
             if status == "REFUSED":
-                st.error(f"⚠️ {response.get('refusal_message')}")
+                st.error(f"⛔ **Query Refused**: {response.get('refusal_message')}")
             elif status == "NO_MATCHES":
                 st.warning(f"⚠️ **No Vector Match**: {response.get('synthesized_insight')}")
             else:
