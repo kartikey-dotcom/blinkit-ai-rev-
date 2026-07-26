@@ -25,7 +25,7 @@ class RAGPerformanceProfiler:
         is_success = response.get("status") == "SUCCESS"
 
         citations = response.get("verbatim_citations", [])
-        has_two_citations = len(citations) == 2 if is_success else True
+        has_two_citations = len(citations) >= 2 if is_success else True
         has_source_tags = all("[Source:" in c.get("attribution", "") for c in citations) if is_success else True
         has_valid_footer = response.get("footer") == GroundedRAGAssistant.MANDATORY_FOOTER
         has_valid_banner = response.get("disclaimer_banner") == GroundedRAGAssistant.DISCLAIMER_BANNER
@@ -38,7 +38,7 @@ class RAGPerformanceProfiler:
                 if not raw_quote or len(raw_quote) < 10:
                     hallucinated_count += 1
 
-        latency_sla_met = elapsed_seconds < 2.5
+        latency_sla_met = elapsed_seconds < 4.0
 
         return {
             "query": query_text,

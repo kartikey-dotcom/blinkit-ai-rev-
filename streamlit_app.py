@@ -98,7 +98,7 @@ from pathlib import Path
 logo_path = Path(__file__).parent / "assets" / "blinkit_logo.png"
 if logo_path.exists():
     logo_b64 = base64.b64encode(logo_path.read_bytes()).decode("utf-8")
-    logo_img_html = f'<img src="data:image/png;base64,{logo_b64}" style="height: 85px; margin-bottom: 6px;" alt="Blinkit Logo"><br>'
+    logo_img_html = f'<img src="data:image/png;base64,{logo_b64}" style="height: 85px; background-color: #FFE141; border-radius: 18px; margin-bottom: 6px;" alt="Blinkit Logo"><br>'
 else:
     logo_img_html = ""
 
