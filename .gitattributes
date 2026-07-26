@@ -1,0 +1,7 @@
+# Force Git to treat binary database files as raw binary (prevents CRLF line-ending corruption)
+*.db binary
+*.sqlite binary
+*.sqlite3 binary
+*.png binary
+*.jpg binary
+*.jpeg binary

@@ -198,12 +198,18 @@ with tab1:
     )
     fig.update_traces(texttemplate='%{text:.1f}%', textposition='outside')
     fig.update_layout(height=350, margin=dict(l=0, r=40, t=40, b=0))
-    st.plotly_chart(fig, use_container_width=True)
+    try:
+        st.plotly_chart(fig, width="stretch")
+    except Exception:
+        st.plotly_chart(fig, use_container_width=True)
 
     # Product Category Adoption Matrix Table
     st.subheader("📦 Product Category Adoption Matrix")
     df_adoption = CustomerDiscoveryEngine.get_category_adoption_dataframe()
-    st.dataframe(df_adoption, use_container_width=True)
+    try:
+        st.dataframe(df_adoption, width="stretch")
+    except Exception:
+        st.dataframe(df_adoption, use_container_width=True)
 
     # 1-Click CSV Exporter
     st.subheader("📥 Export Normalized Customer Feedback Data")

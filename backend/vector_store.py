@@ -97,30 +97,54 @@ class VectorStoreManager:
 
             conn.commit()
 
+    def _generate_fallback_vectors(self):
+        """Generates in-memory vector index directly from multi-channel corpus if SQLite is unavailable or malformed."""
+        try:
+            from backend.pipeline import Phase1Pipeline
+            from backend.embedding_service import VectorEmbeddingService
+            
+            p1 = Phase1Pipeline()
+            summary, sanitized_entries, chunks = p1.run_pipeline()
+            emb_service = VectorEmbeddingService()
+            
+            self._vector_cache.clear()
+            for chunk in chunks:
+                vec = emb_service._generate_deterministic_vector(chunk.chunk_text)
+                self._vector_cache.append((chunk, vec))
+        except Exception:
+            pass
+
     def load_index_into_memory(self, chunks_dict: Optional[Dict[str, TextChunkEntry]] = None):
         """Loads all vector embeddings from SQLite into in-memory search cache for fast retrieval."""
         self._vector_cache.clear()
         
-        # If chunks_dict is not passed, load from database text_chunks table directly
-        if chunks_dict is None:
-            from backend.database import DatabaseManager
-            db_mgr = DatabaseManager(db_path=self.db_path)
-            chunks = db_mgr.get_all_chunks()
-            chunks_dict = {c.chunk_id: c for c in chunks}
+        try:
+            # If chunks_dict is not passed, load from database text_chunks table directly
+            if chunks_dict is None:
+                from backend.database import DatabaseManager
+                db_mgr = DatabaseManager(db_path=self.db_path)
+                chunks = db_mgr.get_all_chunks()
+                chunks_dict = {c.chunk_id: c for c in chunks}
 
-        if not chunks_dict:
-            return
+            if not chunks_dict:
+                self._generate_fallback_vectors()
+                return
 
-        with self._get_connection() as conn:
-            cursor = conn.cursor()
-            cursor.execute("SELECT chunk_id, embedding_json FROM vector_embeddings")
-            rows = cursor.fetchall()
-            for r in rows:
-                chunk_id = r["chunk_id"]
-                if chunk_id in chunks_dict:
-                    chunk = chunks_dict[chunk_id]
-                    vector = json.loads(r["embedding_json"])
-                    self._vector_cache.append((chunk, vector))
+            with self._get_connection() as conn:
+                cursor = conn.cursor()
+                cursor.execute("SELECT chunk_id, embedding_json FROM vector_embeddings")
+                rows = cursor.fetchall()
+                for r in rows:
+                    chunk_id = r["chunk_id"]
+                    if chunk_id in chunks_dict:
+                        chunk = chunks_dict[chunk_id]
+                        vector = json.loads(r["embedding_json"])
+                        self._vector_cache.append((chunk, vector))
+
+            if not self._vector_cache:
+                self._generate_fallback_vectors()
+        except Exception:
+            self._generate_fallback_vectors()
 
     def search_similar(
         self,

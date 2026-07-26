@@ -15,9 +15,19 @@ class DatabaseManager:
         self._init_db()
 
     def _get_connection(self) -> sqlite3.Connection:
-        conn = sqlite3.connect(self.db_path, timeout=30.0, check_same_thread=False)
-        conn.row_factory = sqlite3.Row
-        return conn
+        try:
+            conn = sqlite3.connect(self.db_path, timeout=30.0, check_same_thread=False)
+            conn.row_factory = sqlite3.Row
+            return conn
+        except (sqlite3.DatabaseError, sqlite3.OperationalError):
+            if self.db_path.exists():
+                try:
+                    self.db_path.unlink()
+                except Exception:
+                    pass
+            conn = sqlite3.connect(self.db_path, timeout=30.0, check_same_thread=False)
+            conn.row_factory = sqlite3.Row
+            return conn
 
     def _init_db(self):
         """Creates SQLite tables if they do not exist."""
