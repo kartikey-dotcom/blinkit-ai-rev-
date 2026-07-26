@@ -88,6 +88,20 @@ st.markdown("""
         font-weight: 700;
         margin: 0;
     }
+    .behavioral-card {
+        background-color: #FFFFFF;
+        border-radius: 12px;
+        padding: 20px 24px;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+    }
+    .behavioral-card h4 {
+        color: #000000;
+        font-size: 18px;
+        font-weight: 800;
+        margin-top: 0;
+        margin-bottom: 12px;
+    }
     </style>
 """, unsafe_allow_html=True)
 
@@ -167,16 +181,22 @@ with tab1:
 
     st.markdown("<br>", unsafe_allow_html=True)
 
-    # 8 Core Behavioral Discovery Accordions
-    st.subheader("🧩 8 Core Customer Behavioral Discovery Questions")
+    # 8 Core Behavioral Discovery Cards (Open Executive View)
+    st.subheader("🧩 8 Core Customer Behavioral Discovery Insights")
     
     questions = CustomerDiscoveryEngine.BEHAVIORAL_QUESTIONS
     for q in questions:
-        with st.expander(f"Question {q['id']}: {q['question']}"):
-            st.markdown(f"**Insight Badge**: <span style='background-color:{q['badge_color']}; color:white; padding:4px 10px; border-radius:12px; font-size:13px;'>{q['percentage_badge']}</span>", unsafe_allow_html=True)
-            st.markdown(f"**Synthesized Insight**: {q['insight']}")
-            st.markdown(f"**Customer Verbatim Quote**: *{q['verbatim_quote']}* `{q['attribution']}`")
-            st.markdown(f"**Recommended PM Action**: `{q['pm_action']}`")
+        st.markdown(f"""
+            <div class="behavioral-card" style="border-left: 6px solid {q['badge_color']};">
+                <h4>Question {q['id']}: {q['question']}</h4>
+                <div style="margin-bottom: 10px;">
+                    <strong>Insight Badge</strong>: <span style="background-color:{q['badge_color']}; color:white; padding:4px 12px; border-radius:14px; font-size:13px; font-weight:700;">{q['percentage_badge']}</span>
+                </div>
+                <p style="font-size:15px; color:#1A1A1A; margin-bottom:10px;"><strong>Synthesized Insight</strong>: {q['insight']}</p>
+                <p style="font-size:14px; color:#333333; margin-bottom:10px;"><strong>Customer Verbatim Quote</strong>: <em>{q['verbatim_quote']}</em> <code style="background-color:#F5F5F5; padding:2px 6px; border-radius:4px;">{q['attribution']}</code></p>
+                <p style="font-size:14px; color:#0C831F; font-weight:600; margin:0;"><strong>Recommended PM Action</strong>: <code style="background-color:#E8F5E9; color:#0C831F; padding:4px 8px; border-radius:6px; font-weight:600;">{q['pm_action']}</code></p>
+            </div>
+        """, unsafe_allow_html=True)
 
     st.markdown("<br>", unsafe_allow_html=True)
 
