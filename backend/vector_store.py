@@ -44,27 +44,30 @@ class VectorStoreManager:
             self.load_index_into_memory()
 
     def _get_connection(self) -> sqlite3.Connection:
-        conn = sqlite3.connect(self.db_path)
+        conn = sqlite3.connect(self.db_path, timeout=30.0, check_same_thread=False)
         conn.row_factory = sqlite3.Row
         return conn
 
     def _init_vector_table(self):
         """Initializes the vector embeddings storage table in SQLite."""
-        with self._get_connection() as conn:
-            cursor = conn.cursor()
-            cursor.execute("""
-                CREATE TABLE IF NOT EXISTS vector_embeddings (
-                    chunk_id TEXT PRIMARY KEY,
-                    review_id TEXT,
-                    embedding_json TEXT,
-                    attribution_tag TEXT,
-                    source_channel TEXT,
-                    star_rating INTEGER,
-                    product_category TEXT,
-                    FOREIGN KEY (chunk_id) REFERENCES text_chunks (chunk_id)
-                )
-            """)
-            conn.commit()
+        try:
+            with self._get_connection() as conn:
+                cursor = conn.cursor()
+                cursor.execute("""
+                    CREATE TABLE IF NOT EXISTS vector_embeddings (
+                        chunk_id TEXT PRIMARY KEY,
+                        review_id TEXT,
+                        embedding_json TEXT,
+                        attribution_tag TEXT,
+                        source_channel TEXT,
+                        star_rating INTEGER,
+                        product_category TEXT,
+                        FOREIGN KEY (chunk_id) REFERENCES text_chunks (chunk_id)
+                    )
+                """)
+                conn.commit()
+        except sqlite3.Error:
+            pass
 
     @classmethod
     def cosine_similarity(cls, vec_a: List[float], vec_b: List[float]) -> float:

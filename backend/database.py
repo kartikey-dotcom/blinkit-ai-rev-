@@ -15,68 +15,70 @@ class DatabaseManager:
         self._init_db()
 
     def _get_connection(self) -> sqlite3.Connection:
-        conn = sqlite3.connect(self.db_path)
+        conn = sqlite3.connect(self.db_path, timeout=30.0, check_same_thread=False)
         conn.row_factory = sqlite3.Row
         return conn
 
     def _init_db(self):
         """Creates SQLite tables if they do not exist."""
-        with self._get_connection() as conn:
-            cursor = conn.cursor()
+        try:
+            with self._get_connection() as conn:
+                cursor = conn.cursor()
 
-            # Raw Reviews Table
-            cursor.execute("""
-                CREATE TABLE IF NOT EXISTS raw_reviews (
-                    review_id TEXT PRIMARY KEY,
-                    app_package TEXT,
-                    author_name TEXT,
-                    rating INTEGER,
-                    title TEXT,
-                    raw_text TEXT,
-                    timestamp TEXT,
-                    source_channel TEXT,
-                    community_tag TEXT,
-                    thumbs_up_count INTEGER,
-                    product_category TEXT
-                )
-            """)
+                # Raw Reviews Table
+                cursor.execute("""
+                    CREATE TABLE IF NOT EXISTS raw_reviews (
+                        review_id TEXT PRIMARY KEY,
+                        app_package TEXT,
+                        author_name TEXT,
+                        rating INTEGER,
+                        title TEXT,
+                        raw_text TEXT,
+                        timestamp TEXT,
+                        source_channel TEXT,
+                        community_tag TEXT,
+                        thumbs_up_count INTEGER,
+                        product_category TEXT
+                    )
+                """)
 
-            # Sanitized Reviews Table
-            cursor.execute("""
-                CREATE TABLE IF NOT EXISTS sanitized_reviews (
-                    review_id TEXT PRIMARY KEY,
-                    app_package TEXT,
-                    rating INTEGER,
-                    sanitized_text TEXT,
-                    word_count INTEGER,
-                    has_pii_redacted BOOLEAN,
-                    timestamp TEXT,
-                    source_channel TEXT,
-                    community_tag TEXT,
-                    thumbs_up_count INTEGER,
-                    product_category TEXT
-                )
-            """)
+                # Sanitized Reviews Table
+                cursor.execute("""
+                    CREATE TABLE IF NOT EXISTS sanitized_reviews (
+                        review_id TEXT PRIMARY KEY,
+                        app_package TEXT,
+                        rating INTEGER,
+                        sanitized_text TEXT,
+                        word_count INTEGER,
+                        has_pii_redacted BOOLEAN,
+                        timestamp TEXT,
+                        source_channel TEXT,
+                        community_tag TEXT,
+                        thumbs_up_count INTEGER,
+                        product_category TEXT
+                    )
+                """)
 
-            # Text Chunks Table (500 tokens / 50 overlap)
-            cursor.execute("""
-                CREATE TABLE IF NOT EXISTS text_chunks (
-                    chunk_id TEXT PRIMARY KEY,
-                    review_id TEXT,
-                    chunk_index INTEGER,
-                    total_chunks INTEGER,
-                    chunk_text TEXT,
-                    token_count INTEGER,
-                    source_channel TEXT,
-                    star_rating INTEGER,
-                    community_tag TEXT,
-                    attribution_tag TEXT,
-                    product_category TEXT,
-                    FOREIGN KEY (review_id) REFERENCES sanitized_reviews (review_id)
-                )
-            """)
-
-            conn.commit()
+                # Text Chunks Table (500 tokens / 50 overlap)
+                cursor.execute("""
+                    CREATE TABLE IF NOT EXISTS text_chunks (
+                        chunk_id TEXT PRIMARY KEY,
+                        review_id TEXT,
+                        chunk_index INTEGER,
+                        total_chunks INTEGER,
+                        chunk_text TEXT,
+                        token_count INTEGER,
+                        source_channel TEXT,
+                        star_rating INTEGER,
+                        community_tag TEXT,
+                        attribution_tag TEXT,
+                        product_category TEXT,
+                        FOREIGN KEY (review_id) REFERENCES sanitized_reviews (review_id)
+                    )
+                """)
+                conn.commit()
+        except sqlite3.Error:
+            pass
 
     def save_raw_reviews(self, raw_entries: List[RawReviewEntry]):
         """Persists raw reviews to SQLite."""

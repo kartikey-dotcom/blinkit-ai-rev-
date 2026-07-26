@@ -207,11 +207,21 @@ with tab1:
 
     # 1-Click CSV Exporter
     st.subheader("📥 Export Normalized Customer Feedback Data")
-    db_mgr = DatabaseManager()
-    sanitized_reviews = db_mgr.get_all_sanitized_reviews()
-    if sanitized_reviews:
-        df_export = pd.DataFrame([s.model_dump() for s in sanitized_reviews])
-        csv_bytes = df_export.to_csv(index=False).encode('utf-8')
+
+    @st.cache_data
+    def get_csv_export():
+        try:
+            db_mgr = DatabaseManager()
+            sanitized_reviews = db_mgr.get_all_sanitized_reviews()
+            if sanitized_reviews:
+                df_export = pd.DataFrame([s.model_dump() for s in sanitized_reviews])
+                return df_export.to_csv(index=False).encode('utf-8')
+        except Exception:
+            pass
+        return None
+
+    csv_bytes = get_csv_export()
+    if csv_bytes:
         st.download_button(
             label="⬇️ Download blinkit_playstore_reviews.csv",
             data=csv_bytes,
