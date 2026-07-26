@@ -1,0 +1,26 @@
+# Environment & Secret Configuration
+.env
+.env.local
+.env.*.local
+
+# Python runtime & test cache
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.coverage
+htmlcov/
+.nox/
+.tox/
+
+# IDE & OS System files
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+*.log
+
+# Streamlit local secrets
+.streamlit/secrets.toml
