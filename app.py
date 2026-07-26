@@ -12,7 +12,7 @@ import pandas as pd
 import plotly.express as px
 import base64
 from backend.config import APP_NAME, TARGET_ORGANIZATION
-from backend.customer_discovery_engine import CustomerDiscoveryEngine, BLINKIT_DISCOVERY_MATRIX, RAG_GROUNDED_RESPONSES
+from backend.customer_discovery_engine import CustomerDiscoveryEngine, BLINKIT_DISCOVERY_MATRIX
 from backend.rag_assistant import GroundedRAGAssistant
 from backend.database import DatabaseManager
 
@@ -213,7 +213,7 @@ with tab1:
 
     st.markdown("<br>", unsafe_allow_html=True)
 
-    # 8 Core Behavioral Discovery Cards (Blinkit Yellow Question Header + Side-by-Side Dual Verbatims View)
+    # 8 Core Behavioral Discovery Cards
     st.subheader("🧩 8 Core Customer Behavioral Discovery Insights")
     
     for key, card in BLINKIT_DISCOVERY_MATRIX.items():
@@ -324,105 +324,89 @@ with tab1:
 with tab2:
     st.subheader("🤖 Ask Blinkit AI — Grounded RAG Assistant")
 
-    # Disclaimer Banner (Requirement 6)
+    # Disclaimer Banner
     st.caption("🔒 Grounded AI Assistant: Answers generated strictly from indexed public customer reviews. Zero hallucinated advice.")
 
-    # Requirement 2: Pre-load default query (Eliminate empty state)
+    # Pre-load default query to eliminate empty state
     if "rag_query" not in st.session_state or not st.session_state.rag_query:
-        st.session_state.rag_query = RAG_GROUNDED_RESPONSES["tech"]["query"]
+        st.session_state.rag_query = "Why do users fear buying tech accessories on Blinkit?"
 
-    # Requirement 1: Clean Prompt Chip Button Labels (No "Chip 1:", "Chip 2:", etc.)
+    # Prompt Chip Buttons
     st.markdown("**Interactive Prompt Chips (Click to Query):**")
     chip_col1, chip_col2, chip_col3 = st.columns(3)
     
     with chip_col1:
         if st.button("📱 Why do users fear buying tech accessories on Blinkit?"):
-            st.session_state.rag_query = RAG_GROUNDED_RESPONSES["tech"]["query"]
+            st.session_state.rag_query = "Why do users fear buying tech accessories on Blinkit?"
     with chip_col2:
         if st.button("🧴 What return frustrations emerge for cosmetics > ₹500?"):
-            st.session_state.rag_query = RAG_GROUNDED_RESPONSES["cosmetics"]["query"]
+            st.session_state.rag_query = "What return frustrations emerge for cosmetics > ₹500?"
     with chip_col3:
         if st.button("🥛 What drives daily grocery reorder habits?"):
-            st.session_state.rag_query = RAG_GROUNDED_RESPONSES["grocery"]["query"]
+            st.session_state.rag_query = "What drives daily grocery reorder habits?"
 
     # Query Input Box
     user_query = st.text_input(
         "Enter your strategic PM or user research question:",
         value=st.session_state.rag_query,
-        placeholder="e.g. Why do users hesitate to purchase home utility appliances on Blinkit?"
+        placeholder="e.g. Why do users fear buying from unexplored and new categories?"
     )
 
     btn_submitted = st.button("🔍 Execute Grounded RAG Query", type="primary")
 
-    # Requirement 5: Out-of-Scope Guardrail Refusal
-    query_lower = user_query.lower() if user_query else ""
-    out_of_scope_keywords = ["stock price", "automobile", "car", "phone number", "address", "delivery boy contact"]
+    # Dynamic RAG Engine Execution
+    if user_query:
+        query_lower = user_query.lower()
+        out_of_scope_keywords = ["stock price", "automobile", "car", "phone number", "address", "delivery boy contact"]
 
-    if any(kw in query_lower for kw in out_of_scope_keywords):
-        st.warning("⚠️ This query falls outside the indexed customer feedback corpus. Please ask questions related to product friction, returns, category exploration, or user sentiment.")
-    else:
-        # Match query with pre-loaded fallback data or RAG engine
-        synthesis_text = ""
-        verbatim_1 = ""
-        verbatim_2 = ""
-
-        if "tech" in query_lower or "gadget" in query_lower or "fear" in query_lower:
-            data = RAG_GROUNDED_RESPONSES["tech"]
-            synthesis_text = data["synthesis"]
-            verbatim_1 = data["verbatims"][0]
-            verbatim_2 = data["verbatims"][1]
-        elif "cosmetic" in query_lower or "skincare" in query_lower or "beauty" in query_lower or "₹500" in query_lower:
-            data = RAG_GROUNDED_RESPONSES["cosmetics"]
-            synthesis_text = data["synthesis"]
-            verbatim_1 = data["verbatims"][0]
-            verbatim_2 = data["verbatims"][1]
-        elif "grocery" in query_lower or "reorder" in query_lower or "habit" in query_lower or "milk" in query_lower:
-            data = RAG_GROUNDED_RESPONSES["grocery"]
-            synthesis_text = data["synthesis"]
-            verbatim_1 = data["verbatims"][0]
-            verbatim_2 = data["verbatims"][1]
+        if any(kw in query_lower for kw in out_of_scope_keywords):
+            st.warning("⚠️ This query falls outside the indexed customer feedback corpus. Please ask questions related to product friction, returns, category exploration, or user sentiment.")
         else:
-            # Execute RAG query dynamically
-            loop = asyncio.new_event_loop()
-            asyncio.set_event_loop(loop)
-            response = loop.run_until_complete(rag_assistant.answer_query(user_query))
-            if response.get("status") == "SUCCESS":
-                synthesis_text = response.get("synthesized_insight", "")
+            with st.spinner("Retrieving vector embeddings (Cosine >= 0.75) and synthesizing grounded insights..."):
+                loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(loop)
+                response = loop.run_until_complete(rag_assistant.answer_query(user_query))
+
+            status = response.get("status")
+
+            if status == "REFUSED":
+                st.error(f"⚠️ {response.get('refusal_message')}")
+            elif status == "NO_MATCHES":
+                st.warning(f"⚠️ **No Vector Match**: {response.get('synthesized_insight')}")
+            else:
+                st.success("✅ **Grounded RAG Response Generated Successfully**")
+                
+                st.markdown("### 💡 Synthesized Insight")
+                st.info(response.get("synthesized_insight"))
+
+                # Dual Verbatim Citation Layout Side-by-Side in Tab 2
+                st.markdown("**Retrieved Customer Verbatim Citations:**")
                 citations = response.get("verbatim_citations", [])
-                if len(citations) >= 1:
-                    verbatim_1 = f"{citations[0]['quote']} `{citations[0]['attribution']}`"
-                if len(citations) >= 2:
-                    verbatim_2 = f"{citations[1]['quote']} `{citations[1]['attribution']}`"
+                
+                quote_1 = f"{citations[0]['quote']} {citations[0]['attribution']}" if len(citations) >= 1 else "No citation available."
+                quote_2 = f"{citations[1]['quote']} {citations[1]['attribution']}" if len(citations) >= 2 else (f"{citations[0]['quote']} {citations[0]['attribution']}" if len(citations) >= 1 else "No citation available.")
 
-        if synthesis_text:
-            st.success("✅ **Grounded RAG Response Generated Successfully**")
-            
-            st.markdown("### 💡 Synthesized Insight")
-            st.info(synthesis_text)
+                rv_col1, rv_col2 = st.columns(2)
 
-            # Requirement 3: Dual Verbatim Citation Layout Side-by-Side in Tab 2
-            st.markdown("**Retrieved Customer Verbatim Citations:**")
-            rv_col1, rv_col2 = st.columns(2)
+                with rv_col1:
+                    st.markdown(
+                        f"""
+                        <div style="background-color: #F8F9FA; padding: 12px; border-left: 4px solid #146C2E; border-radius: 6px; min-height: 90px; font-size: 13px; color: #1B1C1D;">
+                            💬 <i>{quote_1}</i>
+                        </div>
+                        """,
+                        unsafe_allow_html=True
+                    )
 
-            with rv_col1:
-                st.markdown(
-                    f"""
-                    <div style="background-color: #F8F9FA; padding: 12px; border-left: 4px solid #146C2E; border-radius: 6px; min-height: 90px; font-size: 13px; color: #1B1C1D;">
-                        💬 <i>{verbatim_1 or RAG_GROUNDED_RESPONSES['tech']['verbatims'][0]}</i>
-                    </div>
-                    """,
-                    unsafe_allow_html=True
-                )
+                with rv_col2:
+                    st.markdown(
+                        f"""
+                        <div style="background-color: #F8F9FA; padding: 12px; border-left: 4px solid #146C2E; border-radius: 6px; min-height: 90px; font-size: 13px; color: #1B1C1D;">
+                            💬 <i>{quote_2}</i>
+                        </div>
+                        """,
+                        unsafe_allow_html=True
+                    )
 
-            with rv_col2:
-                st.markdown(
-                    f"""
-                    <div style="background-color: #F8F9FA; padding: 12px; border-left: 4px solid #146C2E; border-radius: 6px; min-height: 90px; font-size: 13px; color: #1B1C1D;">
-                        💬 <i>{verbatim_2 or RAG_GROUNDED_RESPONSES['tech']['verbatims'][1]}</i>
-                    </div>
-                    """,
-                    unsafe_allow_html=True
-                )
-
-            # Requirement 6: Ground-Truth Verification Footer
-            st.caption("🔒 Ground-Truth Accuracy Verified | Source Corpus Updated: July 2026")
+                # Verification Footer
+                st.caption("🔒 Ground-Truth Accuracy Verified | Source Corpus Updated: July 2026")
