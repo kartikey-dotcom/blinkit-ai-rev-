@@ -377,36 +377,15 @@ with tab2:
                 st.success("✅ **Grounded RAG Response Generated Successfully**")
                 
                 st.markdown("### 💡 Synthesized Insight")
-                st.info(response.get("synthesized_insight"))
-
-                # Dual Verbatim Citation Layout Side-by-Side in Tab 2
-                st.markdown("**Retrieved Customer Verbatim Citations:**")
-                citations = response.get("verbatim_citations", [])
-                
-                quote_1 = f"{citations[0]['quote']} {citations[0]['attribution']}" if len(citations) >= 1 else "No citation available."
-                quote_2 = f"{citations[1]['quote']} {citations[1]['attribution']}" if len(citations) >= 2 else (f"{citations[0]['quote']} {citations[0]['attribution']}" if len(citations) >= 1 else "No citation available.")
-
-                rv_col1, rv_col2 = st.columns(2)
-
-                with rv_col1:
-                    st.markdown(
-                        f"""
-                        <div style="background-color: #F8F9FA; padding: 12px; border-left: 4px solid #146C2E; border-radius: 6px; min-height: 90px; font-size: 13px; color: #1B1C1D;">
-                            💬 <i>{quote_1}</i>
-                        </div>
-                        """,
-                        unsafe_allow_html=True
-                    )
-
-                with rv_col2:
-                    st.markdown(
-                        f"""
-                        <div style="background-color: #F8F9FA; padding: 12px; border-left: 4px solid #146C2E; border-radius: 6px; min-height: 90px; font-size: 13px; color: #1B1C1D;">
-                            💬 <i>{quote_2}</i>
-                        </div>
-                        """,
-                        unsafe_allow_html=True
-                    )
+                # Enlarged Synthesized Insight Box with Green Accent Border & Rich Typography
+                st.markdown(
+                    f"""
+                    <div style="background-color: #F0FDF4; border-left: 6px solid #0C831F; border-radius: 12px; padding: 24px 28px; font-size: 16.5px; color: #1B1C1D; line-height: 1.68; font-weight: 500; margin-bottom: 20px; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);">
+                        {response.get('synthesized_insight')}
+                    </div>
+                    """,
+                    unsafe_allow_html=True
+                )
 
                 # Verification Footer
                 st.caption("🔒 Ground-Truth Accuracy Verified | Source Corpus Updated: July 2026")
