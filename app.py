@@ -15,6 +15,9 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
+# Custom CSS for Blinkit Brand Theme (#FFE141 & #0C831F)
+st.markdown("""
+    <style>
     /* App background & theme */
     .stApp {
         background-color: #F8F9FA;
