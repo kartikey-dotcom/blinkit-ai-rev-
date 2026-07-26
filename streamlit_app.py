@@ -15,9 +15,12 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Custom CSS for Blinkit Brand Theme (#FFE141 & #0C831F)
-st.markdown("""
-    <style>
+    /* App background & theme */
+    .stApp {
+        background-color: #F8F9FA;
+    }
+    
+    /* Main Header Banner */
     .main-header {
         background-color: #FFE141;
         padding: 24px 30px;
@@ -48,59 +51,97 @@ st.markdown("""
         color: #000000;
         font-weight: 900;
     }
-    .disclaimer-banner {
-        background-color: #FFFDE7;
-        border-left: 6px solid #0C831F;
-        padding: 14px 18px;
+
+    /* Navigation Tabs */
+    .stTabs [data-baseweb="tab-list"] {
+        gap: 10px;
+        background-color: #EFEFEF;
+        padding: 6px 10px;
+        border-radius: 12px;
+    }
+    .stTabs [data-baseweb="tab"] {
+        height: 44px;
+        background-color: #FFFFFF;
         border-radius: 8px;
-        color: #1B5E20;
-        font-weight: 600;
-        font-size: 14px;
-        margin-bottom: 20px;
+        color: #000000;
+        font-weight: 700;
+        border: 1px solid #E0E0E0;
     }
-    .footer-stamp {
-        background-color: #ECEFF1;
-        border-top: 2px solid #CFD8DC;
-        padding: 10px;
-        border-radius: 6px;
-        text-align: center;
-        font-size: 13px;
-        color: #455A64;
-        font-weight: 600;
-        margin-top: 20px;
+    .stTabs [aria-selected="true"] {
+        background-color: #FFE141 !important;
+        color: #000000 !important;
+        border: 2px solid #0C831F !important;
+        font-weight: 900 !important;
     }
+
+    /* KPI Cards */
     .kpi-card {
         background-color: #FFFFFF;
         padding: 18px;
-        border-radius: 10px;
+        border-radius: 12px;
         box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-        border-top: 4px solid #FFE141;
+        border-top: 5px solid #FFE141;
+        border-bottom: 3px solid #0C831F;
         text-align: center;
     }
     .kpi-card h3 {
-        color: #666;
+        color: #555555;
         font-size: 14px;
+        font-weight: 700;
         margin-bottom: 5px;
     }
     .kpi-card h2 {
         color: #000000;
         font-size: 28px;
-        font-weight: 700;
+        font-weight: 900;
         margin: 0;
     }
-    .behavioral-card {
+
+    /* Behavioral Discovery Question Cards (Blinkit Yellow Header + Green/Black Answer Body) */
+    .behavioral-card-container {
         background-color: #FFFFFF;
-        border-radius: 12px;
-        padding: 20px 24px;
-        margin-bottom: 20px;
-        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+        border-radius: 14px;
+        margin-bottom: 22px;
+        box-shadow: 0 4px 18px rgba(0, 0, 0, 0.07);
+        overflow: hidden;
+        border: 1px solid #E0E0E0;
     }
-    .behavioral-card h4 {
+    .behavioral-question-header {
+        background-color: #FFE141;
         color: #000000;
+        padding: 14px 20px;
         font-size: 18px;
-        font-weight: 800;
-        margin-top: 0;
+        font-weight: 900;
+        border-bottom: 3px solid #0C831F;
+    }
+    .behavioral-answer-body {
+        padding: 18px 22px;
+        background-color: #FFFFFF;
+    }
+    .answer-insight {
+        font-size: 15px;
+        color: #000000;
+        font-weight: 500;
+        line-height: 1.55;
         margin-bottom: 12px;
+    }
+    .answer-quote {
+        font-size: 14px;
+        color: #1A1A1A;
+        background-color: #F9FBE7;
+        border-left: 4px solid #0C831F;
+        padding: 10px 14px;
+        border-radius: 6px;
+        margin-bottom: 12px;
+    }
+    .answer-pm-action {
+        font-size: 14px;
+        color: #0C831F;
+        font-weight: 700;
+        background-color: #E8F5E9;
+        padding: 10px 14px;
+        border-radius: 8px;
+        border: 1px solid #C8E6C9;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -181,20 +222,32 @@ with tab1:
 
     st.markdown("<br>", unsafe_allow_html=True)
 
-    # 8 Core Behavioral Discovery Cards (Open Executive View)
+    # 8 Core Behavioral Discovery Cards (Blinkit Yellow Question Header + Green/Black Answer View)
     st.subheader("🧩 8 Core Customer Behavioral Discovery Insights")
     
     questions = CustomerDiscoveryEngine.BEHAVIORAL_QUESTIONS
     for q in questions:
         st.markdown(f"""
-            <div class="behavioral-card" style="border-left: 6px solid {q['badge_color']};">
-                <h4>Question {q['id']}: {q['question']}</h4>
-                <div style="margin-bottom: 10px;">
-                    <strong>Insight Badge</strong>: <span style="background-color:{q['badge_color']}; color:white; padding:4px 12px; border-radius:14px; font-size:13px; font-weight:700;">{q['percentage_badge']}</span>
+            <div class="behavioral-card-container">
+                <div class="behavioral-question-header">
+                    Question {q['id']}: {q['question']}
                 </div>
-                <p style="font-size:15px; color:#1A1A1A; margin-bottom:10px;"><strong>Synthesized Insight</strong>: {q['insight']}</p>
-                <p style="font-size:14px; color:#333333; margin-bottom:10px;"><strong>Customer Verbatim Quote</strong>: <em>{q['verbatim_quote']}</em> <code style="background-color:#F5F5F5; padding:2px 6px; border-radius:4px;">{q['attribution']}</code></p>
-                <p style="font-size:14px; color:#0C831F; font-weight:600; margin:0;"><strong>Recommended PM Action</strong>: <code style="background-color:#E8F5E9; color:#0C831F; padding:4px 8px; border-radius:6px; font-weight:600;">{q['pm_action']}</code></p>
+                <div class="behavioral-answer-body">
+                    <div style="margin-bottom: 12px;">
+                        <strong style="color:#000000;">Insight Badge:</strong> 
+                        <span style="background-color:{q['badge_color']}; color:white; padding:4px 12px; border-radius:14px; font-size:13px; font-weight:800;">{q['percentage_badge']}</span>
+                    </div>
+                    <div class="answer-insight">
+                        <strong style="color:#0C831F; font-weight:800;">💡 Synthesized Insight:</strong> {q['insight']}
+                    </div>
+                    <div class="answer-quote">
+                        <strong style="color:#000000; font-weight:700;">💬 Customer Verbatim Quote:</strong> <em>{q['verbatim_quote']}</em> 
+                        <code style="background-color:#E0E0E0; color:#000000; padding:2px 6px; border-radius:4px; font-size:12px;">{q['attribution']}</code>
+                    </div>
+                    <div class="answer-pm-action">
+                        🎯 <strong>Recommended PM Action:</strong> {q['pm_action']}
+                    </div>
+                </div>
             </div>
         """, unsafe_allow_html=True)
 
