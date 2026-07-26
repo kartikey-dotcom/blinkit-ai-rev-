@@ -15,33 +15,45 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Custom CSS for Blinkit Brand Theme (#F7C400 & #000000)
+# Custom CSS for Blinkit Brand Theme (#FFE141 & #0C831F)
 st.markdown("""
     <style>
     .main-header {
-        background-color: #F7C400;
-        padding: 20px;
-        border-radius: 12px;
+        background-color: #FFE141;
+        padding: 24px 30px;
+        border-radius: 16px;
         color: #000000;
         text-align: center;
         margin-bottom: 25px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
     }
     .main-header h1 {
         color: #000000;
-        font-weight: 800;
-        margin: 0;
+        font-weight: 900;
+        font-size: 32px;
+        margin: 10px 0 6px 0;
+        letter-spacing: -0.5px;
     }
     .main-header p {
-        color: #1A1A1A;
-        font-size: 16px;
-        margin-top: 5px;
+        color: #121212;
+        font-size: 15px;
+        font-weight: 600;
+        margin: 0;
+    }
+    .blink-green {
+        color: #0C831F;
+        font-weight: 900;
+    }
+    .blink-black {
+        color: #000000;
+        font-weight: 900;
     }
     .disclaimer-banner {
-        background-color: #FFF8E1;
-        border-left: 6px solid #F7C400;
+        background-color: #FFFDE7;
+        border-left: 6px solid #0C831F;
         padding: 14px 18px;
         border-radius: 8px;
-        color: #5D4037;
+        color: #1B5E20;
         font-weight: 600;
         font-size: 14px;
         margin-bottom: 20px;
@@ -62,7 +74,7 @@ st.markdown("""
         padding: 18px;
         border-radius: 10px;
         box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-        border-top: 4px solid #F7C400;
+        border-top: 4px solid #FFE141;
         text-align: center;
     }
     .kpi-card h3 {
@@ -86,15 +98,15 @@ from pathlib import Path
 logo_path = Path(__file__).parent / "assets" / "blinkit_logo.png"
 if logo_path.exists():
     logo_b64 = base64.b64encode(logo_path.read_bytes()).decode("utf-8")
-    logo_img_html = f'<img src="data:image/png;base64,{logo_b64}" style="height: 75px; border-radius: 16px; margin-bottom: 12px; box-shadow: 0 6px 16px rgba(0,0,0,0.18);" alt="Blinkit Logo"><br>'
+    logo_img_html = f'<img src="data:image/png;base64,{logo_b64}" style="height: 85px; margin-bottom: 6px;" alt="Blinkit Logo"><br>'
 else:
     logo_img_html = ""
 
-# Main Header
+# Main Header Banner
 st.markdown(f"""
     <div class="main-header">
         {logo_img_html}
-        <h1>{APP_NAME} AI Reviews — Grounded RAG Discovery Engine</h1>
+        <h1><span class="blink-black">blink</span><span class="blink-green">it</span> <span style="color:#000000; font-weight:800;">AI Reviews — Grounded RAG Discovery Engine</span></h1>
         <p>Multi-Channel Customer Feedback Intelligence & Cross-Category Habit Analysis | {TARGET_ORGANIZATION}</p>
     </div>
 """, unsafe_allow_html=True)
