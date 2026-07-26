@@ -1,9 +1,16 @@
+import sys
+from pathlib import Path
+
+# Add project root directory to python path for Streamlit Cloud runtime
+ROOT_DIR = Path(__file__).parent.resolve()
+if str(ROOT_DIR) not in sys.path:
+    sys.path.insert(0, str(ROOT_DIR))
+
 import asyncio
 import streamlit as st
 import pandas as pd
 import plotly.express as px
 import base64
-from pathlib import Path
 from backend.config import APP_NAME, TARGET_ORGANIZATION
 from backend.customer_discovery_engine import CustomerDiscoveryEngine, BLINKIT_DISCOVERY_MATRIX
 from backend.rag_assistant import GroundedRAGAssistant
@@ -102,7 +109,7 @@ st.markdown("""
         margin: 0;
     }
 
-    /* Behavioral Discovery Question Cards */
+    /* Behavioral Discovery Question Cards (Blinkit Yellow Header + Green/Black Answer Body) */
     .behavioral-card-container {
         background-color: #FFFFFF;
         border-radius: 14px;
@@ -173,7 +180,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # Load Blinkit Logo Image Asset
-logo_path = Path(__file__).parent / "assets" / "blinkit_logo.png"
+logo_path = ROOT_DIR / "assets" / "blinkit_logo.png"
 if logo_path.exists():
     logo_b64 = base64.b64encode(logo_path.read_bytes()).decode("utf-8")
     logo_img_html = f'<img src="data:image/png;base64,{logo_b64}" style="height: 85px; background-color: #FFE141; border-radius: 18px; margin-bottom: 6px;" alt="Blinkit Logo"><br>'
