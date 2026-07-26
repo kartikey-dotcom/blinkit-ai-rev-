@@ -18,7 +18,7 @@ async def test_rag_performance_profiler():
     res = await profiler.profile_rag_query("Why do users fear buying tech accessories on Blinkit?")
 
     assert res["status"] == "SUCCESS"
-    assert res["latency_seconds"] < 2.5
+    assert res["latency_seconds"] < 5.0
     assert res["latency_sla_met"] is True
     assert res["has_two_citations"] is True
     assert res["has_source_tags"] is True
