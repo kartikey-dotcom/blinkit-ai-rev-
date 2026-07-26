@@ -332,19 +332,31 @@ with tab2:
     if "rag_query" not in st.session_state or not st.session_state.rag_query:
         st.session_state.rag_query = "Why do users fear buying tech accessories on Blinkit?"
 
-    # Prompt Chip Buttons
-    st.markdown("**Interactive Prompt Chips (Click to Query):**")
-    chip_col1, chip_col2, chip_col3 = st.columns(3)
-    
+    # 8 Interactive Prompt Chips (2 Columns x 4 Rows Grid)
+    st.markdown("**Interactive Question Suggestions (Click to Query):**")
+    chip_col1, chip_col2 = st.columns(2)
+
     with chip_col1:
-        if st.button("📱 Why do users fear buying tech accessories on Blinkit?"):
+        if st.button("📱 1. Why do users fear buying tech accessories on Blinkit?"):
             st.session_state.rag_query = "Why do users fear buying tech accessories on Blinkit?"
-    with chip_col2:
-        if st.button("🧴 What return frustrations emerge for cosmetics > ₹500?"):
+        if st.button("🧴 2. What return frustrations emerge for cosmetics > ₹500?"):
             st.session_state.rag_query = "What return frustrations emerge for cosmetics > ₹500?"
-    with chip_col3:
-        if st.button("🥛 What drives daily grocery reorder habits?"):
+        if st.button("🥛 3. What drives daily grocery reorder habits?"):
             st.session_state.rag_query = "What drives daily grocery reorder habits?"
+        if st.button("🔌 4. How does non-returnable policy impact electronics purchases?"):
+            st.session_state.rag_query = "How does non-returnable policy impact electronics purchases?"
+
+    with chip_col2:
+        if st.button("🍳 5. Why do users hesitate to buy home utility appliances?"):
+            st.session_state.rag_query = "Why do users hesitate to buy home utility appliances?"
+        if st.button("⚡ 6. How do peak-hour surge fees & handling fees impact cart building?"):
+            st.session_state.rag_query = "How do peak-hour surge fees & handling fees impact cart building?"
+        if st.button("📦 7. What triggers initial trial in Blinkit Bistro & Gourmet?"):
+            st.session_state.rag_query = "What triggers initial trial in Blinkit Bistro & Gourmet?"
+        if st.button("👑 8. What differentiates Category Experimenters from Grocery Loyalists?"):
+            st.session_state.rag_query = "What differentiates Category Experimenters from Grocery Loyalists?"
+
+    st.markdown("<br>", unsafe_allow_html=True)
 
     # Query Input Box
     user_query = st.text_input(
