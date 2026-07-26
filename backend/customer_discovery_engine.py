@@ -85,6 +85,34 @@ BLINKIT_DISCOVERY_MATRIX = {
     }
 }
 
+# RAG Grounded Responses Fallback Dictionary
+RAG_GROUNDED_RESPONSES = {
+    "tech": {
+        "query": "Why do users fear buying tech accessories on Blinkit?",
+        "synthesis": "Users hesitate to buy higher-ticket electronics on Blinkit due to a combined 'Product Schema' constraint and 'Return Policy Anxiety'. While customers trust 10-minute delivery for daily perishables, they fear receiving unsealed, defective, or counterfeit chargers and earbuds with no easy in-app return pathway.",
+        "verbatims": [
+            '"Received a Type-C fast charger box with zero brand seal, and it stopped working after 2 hours! Support refused a return saying 10-min items are non-returnable." [Source: Reddit r/IndiaTech]',
+            '"Bought a Rs 1,200 Portronics hub on Blinkit because I needed it urgently, but it failed after 2 days and the chatbot gave zero return option." [Source: Play Store | 1-Star Review]'
+        ]
+    },
+    "cosmetics": {
+        "query": "What return frustrations emerge for cosmetics > ₹500?",
+        "synthesis": "For skincare and cosmetics above ₹500, customer frustration centers on authenticity skepticism and product leakage during high-speed transit. Because cosmetics are marked non-returnable by default, users fear financial loss if shade matches are incorrect or seals arrive broken.",
+        "verbatims": [
+            '"Has anyone bought luxury skincare on Blinkit? The bottle seal was opened and leaking. Blinkit needs a verified authenticity tag for cosmetics." [Source: Reddit r/delhi]',
+            '"Scared to buy expensive skincare on Blinkit. What if it arrives leaking or fake? Chatbot gives no return option." [Source: Play Store | 1-Star Review]'
+        ]
+    },
+    "grocery": {
+        "query": "What drives daily grocery reorder habits?",
+        "synthesis": "Daily grocery reordering is powered by extreme speed (under 10 minutes), high-frequency routine needs (morning milk, bread, eggs), and near-zero risk perception. Users operate in a muscle-memory transaction loop with total trust in fresh daily replenishment.",
+        "verbatims": [
+            '"Blinkit is my absolute go-to for daily grocery top-ups! Fresh Amul milk and bread delivered in under 10 minutes every single morning." [Source: Play Store | 5-Star Review]',
+            '"Order veggies and dairy almost 4 times a week. Zero friction, delivered before I finish brewing chai." [Source: Reddit r/delhi]'
+        ]
+    }
+}
+
 
 class CustomerDiscoveryEngine:
     """
@@ -117,7 +145,7 @@ class CustomerDiscoveryEngine:
         for k, v in BLINKIT_DISCOVERY_MATRIX.items()
     ]
 
-    # Category Switching Friction Breakdown (Aligned Label: "Quality & Return Policy Anxiety")
+    # Category Switching Friction Breakdown
     FRICTION_DISTRIBUTION = [
         {"friction_category": "Quality & Return Policy Anxiety", "share_pct": 42.8, "count": 2140},
         {"friction_category": "App UI & Search Visibility", "share_pct": 23.7, "count": 1185},
