@@ -79,10 +79,22 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
+import base64
+from pathlib import Path
+
+# Load Blinkit Logo Image Asset
+logo_path = Path(__file__).parent / "assets" / "blinkit_logo.png"
+if logo_path.exists():
+    logo_b64 = base64.b64encode(logo_path.read_bytes()).decode("utf-8")
+    logo_img_html = f'<img src="data:image/png;base64,{logo_b64}" style="height: 75px; border-radius: 16px; margin-bottom: 12px; box-shadow: 0 6px 16px rgba(0,0,0,0.18);" alt="Blinkit Logo"><br>'
+else:
+    logo_img_html = ""
+
 # Main Header
 st.markdown(f"""
     <div class="main-header">
-        <h1>🛒 {APP_NAME} AI Reviews — Grounded RAG Discovery Engine</h1>
+        {logo_img_html}
+        <h1>{APP_NAME} AI Reviews — Grounded RAG Discovery Engine</h1>
         <p>Multi-Channel Customer Feedback Intelligence & Cross-Category Habit Analysis | {TARGET_ORGANIZATION}</p>
     </div>
 """, unsafe_allow_html=True)
