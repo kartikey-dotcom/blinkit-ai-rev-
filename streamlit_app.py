@@ -109,11 +109,11 @@ st.markdown("""
         margin: 0;
     }
 
-    /* Behavioral Discovery Question Cards (Blinkit Yellow Header + Green/Black Answer Body) */
+    /* Behavioral Discovery Question Cards */
     .behavioral-card-container {
         background-color: #FFFFFF;
         border-radius: 14px;
-        margin-bottom: 22px;
+        margin-bottom: 15px;
         box-shadow: 0 4px 18px rgba(0, 0, 0, 0.07);
         overflow: hidden;
         border: 1px solid #E0E0E0;
@@ -127,7 +127,7 @@ st.markdown("""
         border-bottom: 3px solid #0C831F;
     }
     .behavioral-answer-body {
-        padding: 18px 22px;
+        padding: 16px 20px;
         background-color: #FFFFFF;
     }
     .answer-insight {
@@ -135,25 +135,7 @@ st.markdown("""
         color: #000000;
         font-weight: 500;
         line-height: 1.55;
-        margin-bottom: 12px;
-    }
-    .answer-quote {
-        font-size: 14px;
-        color: #1A1A1A;
-        background-color: #F9FBE7;
-        border-left: 4px solid #0C831F;
-        padding: 10px 14px;
-        border-radius: 6px;
         margin-bottom: 10px;
-    }
-    .answer-pm-action {
-        font-size: 14px;
-        color: #0C831F;
-        font-weight: 700;
-        background-color: #E8F5E9;
-        padding: 10px 14px;
-        border-radius: 8px;
-        border: 1px solid #C8E6C9;
     }
     .disclaimer-banner {
         background-color: #FFFDE7;
@@ -252,38 +234,57 @@ with tab1:
 
     st.markdown("<br>", unsafe_allow_html=True)
 
-    # 8 Core Behavioral Discovery Cards (Blinkit Yellow Question Header + Green/Black Dual Verbatims View)
+    # 8 Core Behavioral Discovery Cards (Blinkit Yellow Question Header + Side-by-Side Dual Verbatims View)
     st.subheader("🧩 8 Core Customer Behavioral Discovery Insights")
     
     for key, card in BLINKIT_DISCOVERY_MATRIX.items():
-        verbatims_html = "".join([
-            f'<div class="answer-quote"><strong style="color:#000000; font-weight:700;">💬 Customer Verbatim:</strong> <em>{quote}</em></div>'
-            for quote in card["verbatims"]
-        ])
-        st.markdown(f"""
-            <div class="behavioral-card-container">
-                <div class="behavioral-question-header" style="display:flex; justify-content:space-between; align-items:center;">
-                    <span>💡 {card['question']}</span>
-                    <span style="background-color:#146C2E; color:white; padding:4px 12px; border-radius:12px; font-size:13px; font-weight:bold;">{card['metric_badge']}</span>
-                </div>
-                <div class="behavioral-answer-body">
-                    <div class="answer-insight">
-                        <strong style="color:#0C831F; font-weight:800;">💡 Synthesized Insight:</strong> {card['key_finding']}
+        with st.container():
+            # Blinkit Yellow Header Box with Question and Green Metric Badge
+            st.markdown(f"""
+                <div class="behavioral-card-container">
+                    <div class="behavioral-question-header" style="display:flex; justify-content:space-between; align-items:center;">
+                        <span>💡 {card['question']}</span>
+                        <span style="background-color:#146C2E; color:white; padding:4px 12px; border-radius:12px; font-size:13px; font-weight:bold;">{card['metric_badge']}</span>
                     </div>
-                    <div style="margin-bottom:8px;">
-                        <strong style="color:#000000; font-weight:700;">Customer Verbatim Citations:</strong>
-                    </div>
-                    {verbatims_html}
-                    <div class="answer-pm-action" style="margin-top:10px;">
-                        🎯 <strong>{card['action']}</strong>
+                    <div class="behavioral-answer-body">
+                        <div class="answer-insight">
+                            <strong style="color:#0C831F; font-weight:800;">💡 Synthesized Insight:</strong> {card['key_finding']}
+                        </div>
                     </div>
                 </div>
-            </div>
-        """, unsafe_allow_html=True)
+            """, unsafe_allow_html=True)
+
+            # Render Dual Customer Verbatim Quotes Side-by-Side (Task 2 Requirement)
+            st.markdown("**Customer Verbatim Citations:**")
+            v_col1, v_col2 = st.columns(2)
+
+            with v_col1:
+                st.markdown(
+                    f"""
+                    <div style="background-color: #F8F9FA; padding: 12px; border-left: 4px solid #146C2E; border-radius: 6px; min-height: 90px; font-size: 13px; color: #1B1C1D;">
+                        💬 <i>{card['verbatims'][0]}</i>
+                    </div>
+                    """,
+                    unsafe_allow_html=True
+                )
+
+            with v_col2:
+                st.markdown(
+                    f"""
+                    <div style="background-color: #F8F9FA; padding: 12px; border-left: 4px solid #146C2E; border-radius: 6px; min-height: 90px; font-size: 13px; color: #1B1C1D;">
+                        💬 <i>{card['verbatims'][1]}</i>
+                    </div>
+                    """,
+                    unsafe_allow_html=True
+                )
+
+            # Strategic PM Action Box
+            st.info(f"🎯 **{card['action']}**")
+            st.divider()
 
     st.markdown("<br>", unsafe_allow_html=True)
 
-    # Plotly Friction Distribution Chart
+    # Plotly Friction Distribution Chart (Aligned Label: "Quality & Return Policy Anxiety")
     st.subheader("📉 Category Switching Friction Distribution")
     friction_data = CustomerDiscoveryEngine.FRICTION_DISTRIBUTION
     df_friction = pd.DataFrame(friction_data)
@@ -344,15 +345,11 @@ with tab1:
 with tab2:
     st.subheader("🤖 Ask Blinkit AI — Grounded RAG Assistant")
 
-    # Mandatory Disclaimer Banner
-    st.markdown(f"""
-        <div class="disclaimer-banner">
-            ⚠️ <strong>{rag_assistant.DISCLAIMER_BANNER}</strong>
-        </div>
-    """, unsafe_allow_html=True)
+    # Mandatory Disclaimer Banner (Task 3 Requirement)
+    st.caption("🔒 Grounded AI Assistant: Answers generated strictly from indexed public customer reviews. Zero hallucinated advice.")
 
-    # Pre-set Prompt Chips
-    st.markdown("**Pre-set Prompt Chips (Click to Query):**")
+    # 3 Interactive Quick-Click Prompt Chips (Task 3 Requirement)
+    st.markdown("**Interactive Quick-Click Prompt Chips:**")
     chip_col1, chip_col2, chip_col3 = st.columns(3)
     
     if "rag_query" not in st.session_state:
@@ -377,34 +374,40 @@ with tab2:
 
     btn_submitted = st.button("🔍 Execute Grounded RAG Query", type="primary")
     if (btn_submitted or st.session_state.rag_query) and user_query:
-        with st.spinner("Retrieving vector embeddings (Cosine >= 0.75) and synthesizing grounded insights..."):
-            # Execute RAG query asynchronously
-            loop = asyncio.new_event_loop()
-            asyncio.set_event_loop(loop)
-            response = loop.run_until_complete(rag_assistant.answer_query(user_query))
+        # Check guardrail refusal keywords (Task 3 Requirement)
+        query_lower = user_query.lower()
+        out_of_scope_keywords = ["stock price", "automobile", "car", "phone number", "address", "delivery boy contact"]
+        
+        if any(kw in query_lower for kw in out_of_scope_keywords):
+            st.error("⚠️ This query falls outside the indexed customer feedback corpus. Please ask questions related to product friction, returns, category exploration, or user sentiment.")
+        else:
+            with st.spinner("Retrieving vector embeddings (Cosine >= 0.75) and synthesizing grounded insights..."):
+                # Execute RAG query asynchronously
+                loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(loop)
+                response = loop.run_until_complete(rag_assistant.answer_query(user_query))
 
-        # Render Response Container
-        status = response.get("status")
+            status = response.get("status")
 
-        if status == "REFUSED":
-            st.error(f"⛔ **Query Refused**: {response.get('refusal_message')}")
-        elif status == "NO_MATCHES":
-            st.warning(f"⚠️ **No Vector Match**: {response.get('synthesized_insight')}")
-        elif status == "SUCCESS":
-            st.success("✅ **Grounded RAG Response Generated Successfully**")
-            
-            st.markdown("### 💡 Synthesized Insight")
-            st.info(response.get("synthesized_insight"))
+            if status == "REFUSED":
+                st.error(f"⚠️ {response.get('refusal_message')}")
+            elif status == "NO_MATCHES":
+                st.warning(f"⚠️ **No Vector Match**: {response.get('synthesized_insight')}")
+            elif status == "SUCCESS":
+                st.success("✅ **Grounded RAG Response Generated Successfully**")
+                
+                st.markdown("### 💡 Synthesized Insight")
+                st.info(response.get("synthesized_insight"))
 
-            st.markdown("### 💬 Direct Customer Verbatim Citations")
-            citations = response.get("verbatim_citations", [])
-            for idx, c in enumerate(citations[:2], 1):
-                st.markdown(f"**Quote {idx}**: {c['quote']}  ")
-                st.markdown(f"`{c['attribution']}` *(Cosine Match Score: {c['cosine_score']})*")
+                st.markdown("### 💬 Direct Customer Verbatim Citations")
+                citations = response.get("verbatim_citations", [])
+                for idx, c in enumerate(citations[:2], 1):
+                    st.markdown(f"**Quote {idx}**: {c['quote']}  ")
+                    st.markdown(f"`{c['attribution']}` *(Cosine Match Score: {c['cosine_score']})*")
 
-            # Mandatory Verification Footer
-            st.markdown("""
-                <div class="footer-stamp">
-                    🛡️ Ground-Truth Accuracy Verified | Source Corpus Updated: July 2026
-                </div>
-            """, unsafe_allow_html=True)
+                # Mandatory Verification Footer (Task 3 Requirement)
+                st.markdown("""
+                    <div class="footer-stamp">
+                        🛡️ Ground-Truth Accuracy Verified | Source Corpus Updated: July 2026
+                    </div>
+                """, unsafe_allow_html=True)

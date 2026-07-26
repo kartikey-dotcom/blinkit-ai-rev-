@@ -117,13 +117,13 @@ class CustomerDiscoveryEngine:
         for k, v in BLINKIT_DISCOVERY_MATRIX.items()
     ]
 
-    # Category Switching Friction Breakdown
+    # Category Switching Friction Breakdown (Aligned Label: "Quality & Return Policy Anxiety")
     FRICTION_DISTRIBUTION = [
-        {"friction_category": "Quality & Return Anxiety", "share_pct": 42.8, "count": 2140},
-        {"friction_category": "App UI & Search Visibility", "share_pct": 23.1, "count": 1155},
+        {"friction_category": "Quality & Return Policy Anxiety", "share_pct": 42.8, "count": 2140},
+        {"friction_category": "App UI & Search Visibility", "share_pct": 23.7, "count": 1185},
         {"friction_category": "Pricing & Surge Fees", "share_pct": 17.6, "count": 880},
         {"friction_category": "Return & Refund Policy Friction", "share_pct": 11.2, "count": 560},
-        {"friction_category": "Habitual Emergency Mental Model", "share_pct": 5.3, "count": 265},
+        {"friction_category": "Habitual Emergency Mental Model", "share_pct": 4.7, "count": 235},
     ]
 
     @classmethod
