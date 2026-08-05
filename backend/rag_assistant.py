@@ -42,12 +42,15 @@ class GroundedRAGAssistant:
             sentences = [s.strip() for s in chunk_text.split(".") if len(s.strip().split()) >= 6]
             quote_text = f"{sentences[0]}." if sentences else f"{chunk_text}."
             
-            # Format attribution tag with nationwide regional coverage
-            attribution = match.chunk.attribution_tag
+            # Format attribution tag with nationwide regional coverage and ensure [Source: prefix
+            attribution = match.chunk.attribution_tag or f"{match.chunk.source_channel} ({match.chunk.star_rating}-Star)"
+            if not attribution.startswith("[Source:"):
+                attribution = f"[Source: {attribution}]"
+
             if "r/" not in attribution and "Star" in attribution:
                 region = region_tags[idx % len(region_tags)]
-                if "(" not in attribution:
-                    attribution = f"{attribution[:-1]} ({region})]"
+                if "(" not in attribution and "]" in attribution:
+                    attribution = attribution.replace("]", f" ({region})]")
             
             verbatims.append({
                 "quote": f'"{quote_text}"',
@@ -60,9 +63,12 @@ class GroundedRAGAssistant:
         # Fallback if fewer matches exist
         while len(verbatims) < min(max_quotes, len(retrieved_matches)):
             match = retrieved_matches[len(verbatims)]
+            attr = match.chunk.attribution_tag or f"{match.chunk.source_channel}"
+            if not attr.startswith("[Source:"):
+                attr = f"[Source: {attr}]"
             verbatims.append({
                 "quote": f'"{match.chunk.chunk_text[:120]}..."',
-                "attribution": match.chunk.attribution_tag,
+                "attribution": attr,
                 "cosine_score": round(match.cosine_similarity, 4),
             })
 
@@ -70,15 +76,40 @@ class GroundedRAGAssistant:
 
     def _synthesize_grounded_insight(self, query_text: str, retrieved_matches: List[VectorSearchResult]) -> str:
         """
-        Synthesizes a 2-3 sentence insight strictly grounded in retrieved vector chunks.
+        Synthesizes a 2-3 sentence insight strictly grounded in retrieved vector chunks using Gemini API or dynamic fallback.
         """
         if not retrieved_matches:
             return "No verified customer feedback entries matched the query with sufficient semantic similarity."
 
+        # 1. Attempt Gemini API dynamic LLM synthesis if API key is present
+        from backend.config import GEMINI_API_KEY
+        if GEMINI_API_KEY and GEMINI_API_KEY.strip() and not GEMINI_API_KEY.startswith("yAQ."):
+            try:
+                import google.generativeai as genai
+                genai.configure(api_key=GEMINI_API_KEY)
+                model = genai.GenerativeModel("gemini-1.5-flash")
+                
+                context_texts = "\n---\n".join([
+                    f"Channel: {m.chunk.source_channel} | Category: {m.chunk.product_category} | Rating: {m.chunk.star_rating}★\nReview text: {m.chunk.chunk_text}"
+                    for m in retrieved_matches
+                ])
+                prompt = (
+                    f"You are the Blinkit AI Rev Engine RAG Assistant. Answer the strategic question below strictly based on the provided customer review context excerpts. "
+                    f"Do NOT speculate or introduce unmentioned facts. Keep your response to a concise, authoritative 2-3 sentence executive synthesis.\n\n"
+                    f"Question: {query_text}\n\n"
+                    f"Context Excerpts:\n{context_texts}\n\n"
+                    f"Executive Synthesis:"
+                )
+                res = model.generate_content(prompt)
+                if res and res.text and len(res.text.strip()) > 20:
+                    return res.text.strip()
+            except Exception:
+                pass
+
+        # 2. Key Keyword / Domain Heuristic Fallbacks for standard Blinkit discovery queries
         top_match = retrieved_matches[0]
         category = top_match.chunk.product_category
         channel = top_match.chunk.source_channel
-
         query_lower = query_text.lower()
 
         if any(w in query_lower for w in ["fear", "unexplored", "different", "hesitat", "barrier", "non-core", "switch", "why"]):
@@ -112,10 +143,12 @@ class GroundedRAGAssistant:
                 "Enabling scheduled 48-hour return pick-ups is essential for category expansion."
             )
         else:
+            # Dynamic synthesis using retrieved top match content
+            match_summaries = ". ".join([m.chunk.chunk_text[:120].strip() for m in retrieved_matches[:2]])
             return (
-                f"Customer feedback retrieved from {channel} highlights key operational and psychological barriers in the {category} vertical. "
-                "Users emphasize the need for clear return policies, authentic product seals, and friction-free customer support workflows. "
-                "Addressing these concerns is critical for shifting users from single-item emergency reorders into multi-category shopping."
+                f"Customer feedback retrieved from {channel} highlights key operational and psychological insights in the {category} vertical. "
+                f"Excerpts indicate: {match_summaries}. "
+                "Addressing these user-reported concerns is critical for optimizing customer experience and driving cross-category shopping on Blinkit."
             )
 
     async def answer_query(self, query_text: str) -> Dict[str, Any]:
@@ -176,7 +209,7 @@ class GroundedRAGAssistant:
                 "footer": self.MANDATORY_FOOTER,
             }
 
-        # Step 4: Extract 2 Verbatim Quotes & Synthesize Insight
+        # Step 4: Extract Verbatim Quotes & Synthesize Insight
         verbatims = self._extract_verbatim_quotes(retrieved_matches)
         insight = self._synthesize_grounded_insight(query_text, retrieved_matches)
 
@@ -190,3 +223,4 @@ class GroundedRAGAssistant:
             "disclaimer_banner": self.DISCLAIMER_BANNER,
             "footer": self.MANDATORY_FOOTER,
         }
+

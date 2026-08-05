@@ -397,5 +397,26 @@ with tab2:
                     unsafe_allow_html=True
                 )
 
+                # Render Verbatim Citations
+                verbatim_citations = response.get("verbatim_citations", [])
+                if verbatim_citations:
+                    st.markdown("### 💬 Nationwide Verbatim Customer Citations")
+                    cit_col1, cit_col2 = st.columns(2)
+                    for idx, cit in enumerate(verbatim_citations):
+                        with (cit_col1 if idx % 2 == 0 else cit_col2):
+                            st.markdown(
+                                f"""
+                                <div style="background-color: #FFFFFF; border: 1px solid #E0E0E0; border-left: 4px solid #0C831F; border-radius: 10px; padding: 14px 18px; margin-bottom: 14px; font-size: 13.5px; color: #1B1C1D; box-shadow: 0 2px 8px rgba(0,0,0,0.03);">
+                                    <div style="font-weight: 800; color: #0C831F; margin-bottom: 6px; font-size: 12.5px; display: flex; justify-content: space-between;">
+                                        <span>🏷️ {cit.get('attribution', '[Source: Customer Review]')}</span>
+                                        <span style="background-color: #E8F5E9; color: #2E7D32; padding: 2px 8px; border-radius: 6px; font-weight: 700;">Cosine: {cit.get('cosine_score', 0.0)}</span>
+                                    </div>
+                                    <div style="font-style: italic; color: #222222; line-height: 1.5;">💬 {cit.get('quote')}</div>
+                                </div>
+                                """,
+                                unsafe_allow_html=True
+                            )
+
                 # Verification Footer
                 st.caption("🔒 Ground-Truth Accuracy Verified | Source Corpus Updated: July 2026")
+
